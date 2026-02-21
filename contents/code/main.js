@@ -8,62 +8,88 @@
 "use strict";
 
 var curveMapping = [
-                    // BASELINE
-                    QEasingCurve.Linear,
+    // BASELINE
+    QEasingCurve.Linear,
 
-                    // GENTLE (Sine)
-                    QEasingCurve.OutSine,
-                    QEasingCurve.InSine,
-                    QEasingCurve.InOutSine,
+    // GENTLE (Sine)
+    QEasingCurve.OutSine,
+    QEasingCurve.InSine,
+    QEasingCurve.InOutSine,
 
-                    // STANDARD (Quad, Cubic)
-                    QEasingCurve.OutQuad,
-                    QEasingCurve.InQuad,
-                    QEasingCurve.InOutQuad,
-                    QEasingCurve.OutCubic,
-                    QEasingCurve.InCubic,
-                    QEasingCurve.InOutCubic,
+    // STANDARD (Quad, Cubic)
+    QEasingCurve.OutQuad,
+    QEasingCurve.InQuad,
+    QEasingCurve.InOutQuad,
+    QEasingCurve.OutCubic,
+    QEasingCurve.InCubic,
+    QEasingCurve.InOutCubic,
 
-                    // SHARP (Quart, Quint, Expo)
-                    QEasingCurve.OutQuart,
-                    QEasingCurve.InQuart,
-                    QEasingCurve.InOutQuart,
-                    QEasingCurve.OutQuint,
-                    QEasingCurve.InQuint,
-                    QEasingCurve.InOutQuint,
-                    QEasingCurve.OutExpo,
-                    QEasingCurve.InExpo,
-                    QEasingCurve.InOutExpo,
+    // SHARP (Quart, Quint, Expo)
+    QEasingCurve.OutQuart,
+    QEasingCurve.InQuart,
+    QEasingCurve.InOutQuart,
+    QEasingCurve.OutQuint,
+    QEasingCurve.InQuint,
+    QEasingCurve.InOutQuint,
+    QEasingCurve.OutExpo,
+    QEasingCurve.InExpo,
+    QEasingCurve.InOutExpo,
 
-                    // SUDDEN (Circ)
-                    QEasingCurve.OutCirc,
-                    QEasingCurve.InCirc,
-                    QEasingCurve.InOutCirc,
+    // SUDDEN (Circ)
+    QEasingCurve.OutCirc,
+    QEasingCurve.InCirc,
+    QEasingCurve.InOutCirc,
 
-                    // PHYSICS (Back)
-                    QEasingCurve.OutBack,
-                    QEasingCurve.InBack,
-                    QEasingCurve.InOutBack,
+    // PHYSICS (Back)
+    QEasingCurve.OutBack,
+    QEasingCurve.InBack,
+    QEasingCurve.InOutBack,
 
-                    // PHYSICS (Elastic)
-                    QEasingCurve.OutElastic,
-                    QEasingCurve.InElastic,
-                    QEasingCurve.InOutElastic,
+    // PHYSICS (Elastic)
+    QEasingCurve.OutElastic,
+    QEasingCurve.InElastic,
+    QEasingCurve.InOutElastic,
 
-                    // PHYSICS (Bounce)
-                    QEasingCurve.OutBounce,
-                    QEasingCurve.InBounce,
-                    QEasingCurve.InOutBounce
-                    ];
+    // PHYSICS (Bounce)
+    QEasingCurve.OutBounce,
+    QEasingCurve.InBounce,
+    QEasingCurve.InOutBounce
+];
 
 var squashEffect = {
     duration: animationTime(250),
     opacity: 1.0,
     curveMin: QEasingCurve.OutExpo,
     curveUnmin: QEasingCurve.OutExpo,
+    minimizeTarget: 0, // 0=TaskManager, 1=TopLeft, 2=Top, 3=TopRight, 4=Left, 5=Right, 6=BottomLeft, 7=Bottom, 8=BottomRight, 9=Mouse
     loadConfig: function () {
         squashEffect.duration = animationTime(effect.readConfig("Duration", 250));
         squashEffect.opacity = effect.readConfig("Opacity", 100) / 100.0;
+        var minimizeTargetValue = effect.readConfig("MinimizeTarget", 0);
+
+        // Normalize enum values to index.
+        if (typeof minimizeTargetValue === "string") {
+            var minimizeTargetMap = {
+                TaskManager: 0,
+                TopLeft: 1,
+                Top: 2,
+                TopRight: 3,
+                Left: 4,
+                Right: 5,
+                BottomLeft: 6,
+                Bottom: 7,
+                BottomRight: 8,
+                Mouse: 9
+            };
+            if (Object.prototype.hasOwnProperty.call(minimizeTargetMap, minimizeTargetValue)) {
+                minimizeTargetValue = minimizeTargetMap[minimizeTargetValue];
+            }
+        }
+
+        squashEffect.minimizeTarget = Number(minimizeTargetValue);
+        if (squashEffect.minimizeTarget < 0 || squashEffect.minimizeTarget > 9) {
+            squashEffect.minimizeTarget = 0;
+        }
 
         var minIndex = effect.readConfig("AnimationCurveMinimize", 16);
         if (minIndex < 0 || minIndex >= curveMapping.length) minIndex = 16;
@@ -73,17 +99,89 @@ var squashEffect = {
         if (unminIndex < 0 || unminIndex >= curveMapping.length) unminIndex = 16;
         squashEffect.curveUnmin = curveMapping[unminIndex];
     },
+    getScreenRect: function (window) {
+        if (window && window.output && window.output.geometry) {
+            return window.output.geometry;
+        }
+
+        if (window && window.screenGeometry) {
+            return window.screenGeometry;
+        }
+
+        if (effects.virtualScreenGeometry) {
+            return effects.virtualScreenGeometry;
+        }
+
+        return {
+            x: 0,
+            y: 0,
+            width: effects.displayWidth,
+            height: effects.displayHeight
+        };
+    },
+    getTargetRect: function (window) {
+        var screenRect = squashEffect.getScreenRect(window);
+        var iconSize = 48; // Default icon size
+        var targetRect = { x: 0, y: 0, width: iconSize, height: iconSize };
+
+        switch (squashEffect.minimizeTarget) {
+            case 0: // Task Manager
+                var iconRect = window.iconGeometry;
+                if (iconRect.width > 0 && iconRect.height > 0) {
+                    return iconRect;
+                }
+                // Fallback to bottom if no icon geometry
+                targetRect.x = screenRect.x + (screenRect.width - iconSize) / 2;
+                targetRect.y = screenRect.y + screenRect.height - iconSize;
+                break;
+            case 1: // Top Left
+                targetRect.x = screenRect.x;
+                targetRect.y = screenRect.y;
+                break;
+            case 2: // Top
+                targetRect.x = screenRect.x + (screenRect.width - iconSize) / 2;
+                targetRect.y = screenRect.y;
+                break;
+            case 3: // Top Right
+                targetRect.x = screenRect.x + screenRect.width - iconSize;
+                targetRect.y = screenRect.y;
+                break;
+            case 4: // Left
+                targetRect.x = screenRect.x;
+                targetRect.y = screenRect.y + (screenRect.height - iconSize) / 2;
+                break;
+            case 5: // Right
+                targetRect.x = screenRect.x + screenRect.width - iconSize;
+                targetRect.y = screenRect.y + (screenRect.height - iconSize) / 2;
+                break;
+            case 6: // Bottom Left
+                targetRect.x = screenRect.x;
+                targetRect.y = screenRect.y + screenRect.height - iconSize;
+                break;
+            case 7: // Bottom
+                targetRect.x = screenRect.x + (screenRect.width - iconSize) / 2;
+                targetRect.y = screenRect.y + screenRect.height - iconSize;
+                break;
+            case 8: // Bottom Right
+                targetRect.x = screenRect.x + screenRect.width - iconSize;
+                targetRect.y = screenRect.y + screenRect.height - iconSize;
+                break;
+            case 9: // Mouse
+                var cursorPos = effects.cursorPos;
+                targetRect.x = cursorPos.x - iconSize / 2;
+                targetRect.y = cursorPos.y - iconSize / 2;
+                break;
+        }
+
+        return targetRect;
+    },
     slotWindowMinimized: function (window) {
         if (effects.hasActiveFullScreenEffect) {
             return;
         }
 
-        // If the window doesn't have an icon in the task manager,
-        // don't animate it.
-        var iconRect = window.iconGeometry;
-        if (iconRect.width == 0 || iconRect.height == 0) {
-            return;
-        }
+        // Get the target rectangle based on minimize target setting
+        var iconRect = squashEffect.getTargetRect(window);
 
         if (window.unminimizeAnimation) {
             if (redirect(window.unminimizeAnimation, Effect.Backward)) {
@@ -144,12 +242,8 @@ var squashEffect = {
             return;
         }
 
-        // If the window doesn't have an icon in the task manager,
-        // don't animate it.
-        var iconRect = window.iconGeometry;
-        if (iconRect.width == 0 || iconRect.height == 0) {
-            return;
-        }
+        // Get the target rectangle based on minimize target setting
+        var iconRect = squashEffect.getTargetRect(window);
 
         if (window.minimizeAnimation) {
             if (redirect(window.minimizeAnimation, Effect.Backward)) {
@@ -213,6 +307,8 @@ var squashEffect = {
         });
     },
     init: function () {
+        // Ensure saved settings are loaded on startup.
+        squashEffect.loadConfig();
         effect.configChanged.connect(squashEffect.loadConfig);
 
         effects.windowAdded.connect(squashEffect.slotWindowAdded);

@@ -13,6 +13,42 @@
             <default>100</default>
             <label>Final opacity of the window when minimized (percentage)</label>
         </entry>
+        <entry name="MinimizeTarget" type="Enum">
+            <label>Where the window minimizes to</label>
+            <default>TaskManager</default>
+            <choices>
+                <choice name="TaskManager">
+                    <label>Task Manager (Default)</label>
+                </choice>
+                <choice name="TopLeft">
+                    <label>Fixed - Top Left</label>
+                </choice>
+                <choice name="Top">
+                    <label>Fixed - Top</label>
+                </choice>
+                <choice name="TopRight">
+                    <label>Fixed - Top Right</label>
+                </choice>
+                <choice name="Left">
+                    <label>Fixed - Left</label>
+                </choice>
+                <choice name="Right">
+                    <label>Fixed - Right</label>
+                </choice>
+                <choice name="BottomLeft">
+                    <label>Fixed - Bottom Left</label>
+                </choice>
+                <choice name="Bottom">
+                    <label>Fixed - Bottom</label>
+                </choice>
+                <choice name="BottomRight">
+                    <label>Fixed - Bottom Right</label>
+                </choice>
+                <choice name="Mouse">
+                    <label>Mouse Position</label>
+                </choice>
+            </choices>
+        </entry>
         <entry name="AnimationCurveMinimize" type="Enum">
             <label>The animation curve to use</label>
             <default>OutExpo</default>

@@ -52,13 +52,35 @@
             </item>
 
             <item row="2" column="0">
+                <widget class="QLabel" name="label_MinimizeTarget">
+                    <property name="text">
+                        <string>Minimize To:</string>
+                    </property>
+                </widget>
+            </item>
+            <item row="2" column="1">
+                <widget class="QComboBox" name="kcfg_MinimizeTarget">
+                    <item><property name="text"><string>Task Manager (Default)</string></property></item>
+                    <item><property name="text"><string>Fixed - Top Left</string></property></item>
+                    <item><property name="text"><string>Fixed - Top</string></property></item>
+                    <item><property name="text"><string>Fixed - Top Right</string></property></item>
+                    <item><property name="text"><string>Fixed - Left</string></property></item>
+                    <item><property name="text"><string>Fixed - Right</string></property></item>
+                    <item><property name="text"><string>Fixed - Bottom Left</string></property></item>
+                    <item><property name="text"><string>Fixed - Bottom</string></property></item>
+                    <item><property name="text"><string>Fixed - Bottom Right</string></property></item>
+                    <item><property name="text"><string>Mouse Position</string></property></item>
+                </widget>
+            </item>
+
+            <item row="3" column="0">
                 <widget class="QLabel" name="label_CurveMin">
                     <property name="text">
                         <string>Minimize Curve:</string>
                     </property>
                 </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
                 <widget class="QComboBox" name="kcfg_AnimationCurveMinimize">
                     <item><property name="text"><string>Linear (No Acceleration)</string></property></item>
 
@@ -101,14 +123,14 @@
                 </widget>
             </item>
 
-            <item row="3" column="0">
+            <item row="4" column="0">
                 <widget class="QLabel" name="label_CurveUnmin">
                     <property name="text">
                         <string>Unminimize Curve:</string>
                     </property>
                 </widget>
             </item>
-            <item row="3" column="1">
+            <item row="4" column="1">
                 <widget class="QComboBox" name="kcfg_AnimationCurveUnminimize">
                     <item><property name="text"><string>Linear (No Acceleration)</string></property></item>
 

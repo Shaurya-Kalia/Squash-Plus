@@ -46,15 +46,21 @@
             {
                 "Name": "Shaurya Kalia",
                 "Email": ""
-        }
+            }
+        ],
+        "OtherContributors": [
+            {
+                "Name": "Ray Zhang",
+                "Email": "rayzhangshanghai@hotmail.com"
+            }
         ],
         "Category": "Appearance",
         "EnabledByDefault": false,
         "Icon": "preferences-system-windows-effect-squash",
         "License": "GPL-3.0"
-},
+    },
     "X-KDE-ConfigModule": "kcm_kwin4_genericscripted",
     "X-Plasma-MainScript": "code/main.js",
     "X-KDE-Ordering": 60,
     "X-Plasma-API": "javascript"
-    }
+}
