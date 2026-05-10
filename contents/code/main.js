@@ -102,6 +102,8 @@ var squashEffect = {
 
         var windowRect = window.geometry;
 
+        window.setData(Effect.WindowForceBlurRole, true);
+
         window.minimizeAnimation = animate({
             window: window,
             curve: squashEffect.curveMin,
@@ -125,10 +127,8 @@ var squashEffect = {
                         value2: 0.0
                     },
                     to: {
-                        value1: iconRect.x - windowRect.x -
-                        (windowRect.width - iconRect.width) / 2,
-                                           value2: iconRect.y - windowRect.y -
-                                           (windowRect.height - iconRect.height) / 2,
+                        value1: iconRect.x - windowRect.x - (windowRect.width - iconRect.width) / 2,
+                        value2: iconRect.y - windowRect.y - (windowRect.height - iconRect.height) / 2
                     }
                 },
                 {
@@ -187,10 +187,8 @@ var squashEffect = {
                 {
                     type: Effect.Translation,
                     from: {
-                        value1: iconRect.x - windowRect.x -
-                        (windowRect.width - iconRect.width) / 2,
-                                             value2: iconRect.y - windowRect.y -
-                                             (windowRect.height - iconRect.height) / 2,
+                        value1: iconRect.x - windowRect.x - (windowRect.width - iconRect.width) / 2,
+                        value2: iconRect.y - windowRect.y - (windowRect.height - iconRect.height) / 2
                     },
                     to: {
                         value1: 0.0,
