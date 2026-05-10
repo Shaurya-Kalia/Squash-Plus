@@ -215,6 +215,8 @@ var squashEffect = {
         });
     },
     init: function () {
+        squashEffect.loadConfig();
+
         effect.configChanged.connect(squashEffect.loadConfig);
 
         effects.windowAdded.connect(squashEffect.slotWindowAdded);
