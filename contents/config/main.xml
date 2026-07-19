@@ -13,6 +13,10 @@
             <default>100</default>
             <label>Final opacity of the window when minimized (percentage)</label>
         </entry>
+        <entry name="RotationAngle" type="Int">
+            <default>0</default>
+            <label>Rotation angle during minimization (degrees)</label>
+        </entry>
         <entry name="AnimationCurveMinimize" type="Enum">
             <label>The animation curve to use</label>
             <default>OutExpo</default>

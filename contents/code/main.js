@@ -59,11 +59,13 @@ var curveMapping = [
 var squashEffect = {
     duration: animationTime(250),
     opacity: 1.0,
+    rotationAngle: 0.0,
     curveMin: QEasingCurve.OutExpo,
     curveUnmin: QEasingCurve.OutExpo,
     loadConfig: function () {
         squashEffect.duration = animationTime(effect.readConfig("Duration", 250));
         squashEffect.opacity = effect.readConfig("Opacity", 100) / 100.0;
+        squashEffect.rotationAngle = effect.readConfig("RotationAngle", 0);
 
         var minIndex = effect.readConfig("AnimationCurveMinimize", 16);
         if (minIndex < 0 || minIndex >= curveMapping.length) minIndex = 16;
@@ -135,6 +137,12 @@ var squashEffect = {
                     type: Effect.Opacity,
                     from: 1.0,
                     to: squashEffect.opacity
+                },
+                {
+                    type: Effect.Rotation,
+                    axis: 2,
+                    from: 0.0,
+                    to: squashEffect.rotationAngle
                 }
             ]
         });
@@ -199,6 +207,12 @@ var squashEffect = {
                     type: Effect.Opacity,
                     from: squashEffect.opacity,
                     to: 1.0
+                },
+                {
+                    type: Effect.Rotation,
+                    axis: 2,
+                    from: squashEffect.rotationAngle,
+                    to: 0.0
                 }
             ]
         });
