@@ -176,6 +176,8 @@ var squashEffect = {
 
         var windowRect = window.geometry;
 
+        window.setData(Effect.WindowForceBlurRole, true);
+
         window.unminimizeAnimation = animate({
             window: window,
             curve: squashEffect.curveUnmin,
@@ -226,10 +228,23 @@ var squashEffect = {
             }
         });
     },
+    slotAnimationEnded: function (window, animationId) {
+        if (window.minimizeAnimation === animationId) {
+            delete window.minimizeAnimation;
+        } else if (window.unminimizeAnimation === animationId) {
+            delete window.unminimizeAnimation;
+        } else {
+            return;
+        }
+        if (!window.minimizeAnimation && !window.unminimizeAnimation) {
+            window.setData(Effect.WindowForceBlurRole, null);
+        }
+    },
     init: function () {
         squashEffect.loadConfig();
 
         effect.configChanged.connect(squashEffect.loadConfig);
+        effect.animationEnded.connect(squashEffect.slotAnimationEnded);
 
         effects.windowAdded.connect(squashEffect.slotWindowAdded);
         for (const window of effects.stackingOrder) {
