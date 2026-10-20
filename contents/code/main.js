@@ -176,6 +176,8 @@ var squashEffect = {
 
         var windowRect = window.geometry;
 
+        window.setData(Effect.WindowForceBlurRole, true);
+
         window.unminimizeAnimation = animate({
             window: window,
             curve: squashEffect.curveUnmin,
@@ -217,7 +219,20 @@ var squashEffect = {
             ]
         });
     },
+    slotWindowDataChanged: function (window, role) {
+        if (role === Effect.WindowForceBlurRole && !window.data(Effect.WindowForceBlurRole)) {
+            window.setData(Effect.WindowForceBlurRole, true);
+        }
+    },
     slotWindowAdded: function (window) {
+        window.setData(Effect.WindowForceBlurRole, true);
+
+        if (window.windowStartUserMovedResized) {
+            window.windowStartUserMovedResized.connect(() => {
+                window.setData(Effect.WindowForceBlurRole, true);
+            });
+        }
+
         window.minimizedChanged.connect(() => {
             if (window.minimized) {
                 squashEffect.slotWindowMinimized(window);
@@ -230,6 +245,7 @@ var squashEffect = {
         squashEffect.loadConfig();
 
         effect.configChanged.connect(squashEffect.loadConfig);
+        effects.windowDataChanged.connect(squashEffect.slotWindowDataChanged);
 
         effects.windowAdded.connect(squashEffect.slotWindowAdded);
         for (const window of effects.stackingOrder) {
