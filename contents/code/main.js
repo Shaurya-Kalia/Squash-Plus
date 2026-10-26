@@ -75,6 +75,7 @@ var squashEffect = {
         if (unminIndex < 0 || unminIndex >= curveMapping.length) unminIndex = 16;
         squashEffect.curveUnmin = curveMapping[unminIndex];
     },
+
     slotWindowMinimized: function (window) {
         if (effects.hasActiveFullScreenEffect) {
             return;
@@ -87,8 +88,10 @@ var squashEffect = {
             return;
         }
 
+        var isAnimating = window.lastAnimTime && (Date.now() - window.lastAnimTime < squashEffect.duration);
+
         if (window.unminimizeAnimation) {
-            if (redirect(window.unminimizeAnimation, Effect.Backward)) {
+            if (isAnimating && redirect(window.unminimizeAnimation, Effect.Backward)) {
                 return;
             }
             cancel(window.unminimizeAnimation);
@@ -96,12 +99,13 @@ var squashEffect = {
         }
 
         if (window.minimizeAnimation) {
-            if (redirect(window.minimizeAnimation, Effect.Forward)) {
+            if (isAnimating && redirect(window.minimizeAnimation, Effect.Forward)) {
                 return;
             }
             cancel(window.minimizeAnimation);
+            delete window.minimizeAnimation;
         }
-
+        window.lastAnimTime = Date.now();
         var windowRect = window.geometry;
 
         window.setData(Effect.WindowForceBlurRole, true);
@@ -159,8 +163,10 @@ var squashEffect = {
             return;
         }
 
+        var isAnimating = window.lastAnimTime && (Date.now() - window.lastAnimTime < squashEffect.duration);
+
         if (window.minimizeAnimation) {
-            if (redirect(window.minimizeAnimation, Effect.Backward)) {
+            if (isAnimating && redirect(window.minimizeAnimation, Effect.Backward)) {
                 return;
             }
             cancel(window.minimizeAnimation);
@@ -168,12 +174,13 @@ var squashEffect = {
         }
 
         if (window.unminimizeAnimation) {
-            if (redirect(window.unminimizeAnimation, Effect.Forward)) {
+            if (isAnimating && redirect(window.unminimizeAnimation, Effect.Forward)) {
                 return;
             }
             cancel(window.unminimizeAnimation);
+            delete window.unminimizeAnimation;
         }
-
+        window.lastAnimTime = Date.now();
         var windowRect = window.geometry;
 
         window.setData(Effect.WindowForceBlurRole, true);
@@ -241,12 +248,15 @@ var squashEffect = {
             }
         });
     },
+    slotAnimationEnded: function (window) {
+        delete window.minimizeAnimation;
+        delete window.unminimizeAnimation;
+    },
     init: function () {
         squashEffect.loadConfig();
-
         effect.configChanged.connect(squashEffect.loadConfig);
+        effect.animationEnded.connect(squashEffect.slotAnimationEnded);
         effects.windowDataChanged.connect(squashEffect.slotWindowDataChanged);
-
         effects.windowAdded.connect(squashEffect.slotWindowAdded);
         for (const window of effects.stackingOrder) {
             squashEffect.slotWindowAdded(window);
