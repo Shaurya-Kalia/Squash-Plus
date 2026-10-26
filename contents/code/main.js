@@ -76,6 +76,23 @@ var squashEffect = {
         squashEffect.curveUnmin = curveMapping[unminIndex];
     },
 
+    sameIconGeometry: function (a, b) {
+        return !!a &&
+        Math.abs(a.x - b.x) < 0.5 &&
+        Math.abs(a.y - b.y) < 0.5 &&
+        Math.abs(a.width - b.width) < 0.5 &&
+        Math.abs(a.height - b.height) < 0.5;
+    },
+
+    rememberIconGeometry: function (window, rect) {
+        window.squashIconGeometry = {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height
+        };
+    },
+
     slotWindowMinimized: function (window) {
         if (effects.hasActiveFullScreenEffect) {
             return;
@@ -88,10 +105,13 @@ var squashEffect = {
             return;
         }
 
-        var isAnimating = window.lastAnimTime && (Date.now() - window.lastAnimTime < squashEffect.duration);
+        var sameTarget = squashEffect.sameIconGeometry(window.squashIconGeometry,iconRect);
+
+        var isAnimating = sameTarget && window.lastAnimTime && (Date.now() - window.lastAnimTime < squashEffect.duration);
 
         if (window.unminimizeAnimation) {
             if (isAnimating && redirect(window.unminimizeAnimation, Effect.Backward)) {
+                window.lastAnimTime = Date.now();
                 return;
             }
             cancel(window.unminimizeAnimation);
@@ -105,10 +125,13 @@ var squashEffect = {
             cancel(window.minimizeAnimation);
             delete window.minimizeAnimation;
         }
-        window.lastAnimTime = Date.now();
+
         var windowRect = window.geometry;
 
         window.setData(Effect.WindowForceBlurRole, true);
+
+        window.lastAnimTime = Date.now();
+        squashEffect.rememberIconGeometry(window, iconRect);
 
         window.minimizeAnimation = animate({
             window: window,
@@ -163,7 +186,9 @@ var squashEffect = {
             return;
         }
 
-        var isAnimating = window.lastAnimTime && (Date.now() - window.lastAnimTime < squashEffect.duration);
+        var sameTarget = squashEffect.sameIconGeometry(window.squashIconGeometry,iconRect);
+
+        var isAnimating = sameTarget && window.lastAnimTime && (Date.now() - window.lastAnimTime < squashEffect.duration);
 
         if (window.minimizeAnimation) {
             if (isAnimating && redirect(window.minimizeAnimation, Effect.Backward)) {
@@ -175,6 +200,7 @@ var squashEffect = {
 
         if (window.unminimizeAnimation) {
             if (isAnimating && redirect(window.unminimizeAnimation, Effect.Forward)) {
+                window.lastAnimTime = Date.now();
                 return;
             }
             cancel(window.unminimizeAnimation);
@@ -184,6 +210,9 @@ var squashEffect = {
         var windowRect = window.geometry;
 
         window.setData(Effect.WindowForceBlurRole, true);
+
+        window.lastAnimTime = Date.now();
+        squashEffect.rememberIconGeometry(window, iconRect);
 
         window.unminimizeAnimation = animate({
             window: window,
@@ -255,7 +284,6 @@ var squashEffect = {
     init: function () {
         squashEffect.loadConfig();
         effect.configChanged.connect(squashEffect.loadConfig);
-        effect.animationEnded.connect(squashEffect.slotAnimationEnded);
         effects.windowDataChanged.connect(squashEffect.slotWindowDataChanged);
         effects.windowAdded.connect(squashEffect.slotWindowAdded);
         for (const window of effects.stackingOrder) {
